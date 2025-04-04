@@ -16,7 +16,7 @@ services:
 
   db:
     image: postgres:16
-    container_name: db
+    container_name: avtoservices_union_db
     environment:
       POSTGRES_DB: "postgres"
       POSTGRES_USER: "postgres"
