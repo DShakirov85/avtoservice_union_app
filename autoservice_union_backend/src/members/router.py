@@ -19,6 +19,8 @@ async def create_member(
     try:
         data = await request.body()
         logger.info(f"Received request: {data}")
+        json_data = json.loads(data)
+        logger.info(json_data)
     except Exception as e:
         logger.debug(e)
     try:
