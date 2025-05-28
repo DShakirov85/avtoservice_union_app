@@ -17,8 +17,13 @@ async def create_member(
     request: Request
 ):
     try:
+        data = await request.body()
+        logger.info(f"Received request: {data}")
+    except Exception as e:
+        logger.debug(e)
+    try:
         payload = await request.json()
-        logger.info(json.dumps(payload))
+        logger.info(payload)
     except Exception as e:
         logger.debug(e)
     finally:
