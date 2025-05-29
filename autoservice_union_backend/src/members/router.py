@@ -1,9 +1,11 @@
+import ast
 import json
 
 from fastapi import APIRouter, Depends
 from starlette.requests import Request
 
 from logger import logger
+from .services import fix_bad_json
 
 
 router = APIRouter(
@@ -18,15 +20,10 @@ async def create_member(
 ):
     try:
         data = await request.body()
-        logger.info(f"Received request: {data}")
-        json_data = json.loads(data)
-        logger.info(json_data)
+        print(data)
+        j = json.loads(fix_bad_json(data))
+        print(j)
     except Exception as e:
-        logger.debug(e)
-    try:
-        payload = await request.json()
-        logger.info(payload)
-    except Exception as e:
-        logger.debug(e)
+        print(e)
     finally:
-        return {"ok: True"}
+        return {"ok": True}
