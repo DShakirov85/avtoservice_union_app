@@ -20,10 +20,10 @@ async def create_member(
 ):
     try:
         data = await request.body()
-        print(data)
+        logger.info(data)
         j = json.loads(fix_bad_json(data))
-        print(j)
+        logger.info(j)
     except Exception as e:
-        print(e)
+        logger.info(e)
     finally:
         return {"ok": True}
