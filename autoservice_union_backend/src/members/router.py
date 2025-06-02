@@ -21,8 +21,9 @@ async def create_member(
     try:
         data = await request.body()
         logger.info(data)
-        j = json.loads(fix_bad_json(data))
-        logger.info(j)
+        j = json.loads(data)
+        #j = json.loads(fix_bad_json(data))
+        #logger.info(j)
     except Exception as e:
         logger.info(e)
     finally:
