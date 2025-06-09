@@ -10,6 +10,10 @@ from .schemas import (
 )
 from logger import logger
 
+from ms_word.services import MSWordManager
+
+from mail.services import EmailManager
+
 
 def fix_bad_json(bad_json_bytes):
     bad_json_str = bad_json_bytes.decode('utf-8')
@@ -29,7 +33,19 @@ async def process_data(data: Any):
         logger.info(serialized_data)
     except ValidationError:
         logger.warning(data)
-
+        return
+    word = MSWordManager()
+    if data_type == CompanyLeaderForm:
+        participation_form = word.create_leader_participation_form(serialized_data)
+    if data_type == IndividualEntrepreneurForm:
+        participation_form = word.create_individual_entrepreneur_participation_form(serialized_data)
+    if data_type == LegalEntityForm:
+        participation_form = word.create_legal_entity_participation_form(serialized_data)
+    survey_form = word.create_survey_form(serialized_data)
+    print(serialized_data.email)
+    if serialized_data.email:
+        email_manager = EmailManager()
+        await email_manager.send_participation_email(serialized_data.email, participation_form, survey_form)
 
 
 def detect_form_type(data: dict) -> type:

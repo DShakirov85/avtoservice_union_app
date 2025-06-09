@@ -77,7 +77,12 @@ class AutoServiceUnionForm(BaseModel):
             bik=values.get("БИК")
         )
 
-    @field_validator('tax_registration_date', 'registration_date', mode='before')
+    @field_validator(
+        'tax_registration_date',
+        'registration_date',
+        'registration_address',
+        mode='before'
+    )
     def parse_dates(cls, v):
         if v in (None, "Нет ответа"):
             return None
@@ -102,7 +107,7 @@ class AutoServiceUnionForm(BaseModel):
     def set_social_media(cls, v, values):
         if v in (None, "Нет ответа"):
             return None
-        return v
+        return v.replace('\\n', '\n').replace('Укажите ваше представительство в интернете', '')
 
     @field_validator('company_ogrnip', 'company_inn', mode='before')
     def parse_ogrnip_and_inn(cls, v):
@@ -116,7 +121,12 @@ class CompanyLeaderForm(AutoServiceUnionForm):
     company_ogrn: Optional[str] = Field(None, alias="ОГРН организации")
 
 
-    @field_validator('company_ogrn', 'company_kpp', mode='before')
+    @field_validator(
+        'company_ogrn',
+        'company_kpp',
+        'company_name',
+        mode='before'
+    )
     def empty_to_none(cls, v):
         return None if v == "Нет ответа" else v
 

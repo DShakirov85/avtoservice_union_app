@@ -1,34 +1,179 @@
 from docx import Document
 
-from members.schemas import BusinessOwnerValues, BusinessManagerValues, IndividualEntrepreneurValues
+from members.schemas import   (
+    CompanyLeaderForm,
+    IndividualEntrepreneurForm,
+    LegalEntityForm
+)
+
+from members.schemas import BankDetails
 
 
 class MSWordManager:
-    def create_participation_form(
+    def create_leader_participation_form(
             self,
-            values: BusinessOwnerValues | BusinessManagerValues | IndividualEntrepreneurValues
+            values: CompanyLeaderForm
     ):
 
-        document = Document("templates/participation_form.docx")
-        print(values.towns)
+        document = Document("templates/leader_participation_form.docx")
+        bank_details = values.bank_details
+        if not bank_details:
+            bank_details = BankDetails(
+                bank_name="",
+                account_number="",
+                correspondent_account="",
+                bik=""
+            )
         replace_values = {
-            "{organization_full_name}": values.organization_full_name,
-            "{organization_short_name}": values.organization_short_name,
-            "{organization_registration_date}": values.organization_registration_date,
-            "{legal_address_of_organization}": values.legal_address_of_organization,
-            "{main_business_place_address}": values.main_business_place_address,
-            "{mailing_address_with_zip_code}": values.mailing_address_with_zip_code,
-            "{organization_inn}": values.organization_inn,
-            "{organization_main_okved_codes}": values.organization_main_okved_codes,
-            "{bank_name}": values.bank_name,
-            "{current_account}": values.current_account,
-            "{correspondent_account}": values.correspondent_account,
-            "{bic}": values.bic,
-            "{towns}": values.towns
+            "{{full_name}}": values.full_name,
+            "{{passport}}": values.passport_data,
+            "{{legal_address}}": values.legal_address,
+            "{{inn}}": values.company_inn,
+            "{{company_name}}": values.company_name,
+            "{{okved_codes}}": values.okved_codes,
+            "{{actual_address}}": values.actual_address,
+            "{{mailing_address}}": values.mailing_address,
+            "{{company_phone}}": values.company_phone,
+            "{{personal_phone}}": values.personal_phone,
+            "{{website}}": values.website,
         }
         for placeholder, value in replace_values.items():
             self.replace_placeholder(document, placeholder, value)
-        document.save(f"files/participation_form_{values.organization_full_name}.docx")
+
+        document.save(f"files/leader_participation_form_{values.company_name}.docx")
+        return f"files/leader_participation_form_{values.company_name}.docx"
+
+    def create_individual_entrepreneur_participation_form(
+            self,
+            values: IndividualEntrepreneurForm
+    ):
+        bank_details = values.bank_details
+        if not bank_details:
+            bank_details = BankDetails(
+                bank_name="",
+                account_number="",
+                correspondent_account="",
+                bik=""
+            )
+        document = Document("templates/individual_participation_form.docx")
+        replace_values = {
+            "{{full_name}}": values.full_name,
+            "{{registration_address}}": values.registration_address,
+            "{{tax_registration_date}}": values.tax_registration_date,
+            "{{company_inn}}": values.company_inn,
+            "{{ogrnip}}": values.ogrnip,
+            "{{okved_codes}}": values.okved_codes,
+            "{{actual_address}}": values.actual_address,
+            "{{mailing_address}}": values.mailing_address,
+            "{{company_phone}}": values.company_phone or "",
+            "{{personal_phone}}": values.personal_phone,
+            "{{email}}": values.email or "",
+            "{{website}}": values.website,
+            "{{bank}}": bank_details.bank_name,
+            "{{account_number}}": bank_details.account_number,
+            "{{correspondent_account}}": bank_details.correspondent_account,
+            "{{bik}}": bank_details.bik,
+        }
+        for placeholder, value in replace_values.items():
+            self.replace_placeholder(document, placeholder, value)
+
+        document.save(f"files/individual_participation_form_{values.full_name}.docx")
+        return f"files/individual_participation_form_{values.full_name}.docx"
+
+    def create_legal_entity_participation_form(
+        self,
+        values: LegalEntityForm
+    ):
+        document = Document("templates/legal_entity_participation_form.docx")
+        bank_details = values.bank_details
+        if not bank_details:
+            bank_details = BankDetails(
+                bank_name="",
+                account_number="",
+                correspondent_account="",
+                bik=""
+            )
+        replace_values = {
+            "{{full_name}}": values.full_name,
+            "{{company_name}}": values.company_name,
+            "{{company_kpp}}": values.company_kpp,
+            "{{company_ogrn}}": values.company_ogrn,
+            "{{director_position}}": values.director_position,
+            "{{director_full_name}}": values.director_full_name,
+            "{{registration_address}}": values.registration_address,
+            "{{tax_registration_date}}": values.tax_registration_date,
+            "{{company_inn}}": values.company_inn,
+            "{{ogrnip}}": values.ogrnip,
+            "{{okved_codes}}": values.okved_codes,
+            "{{actual_address}}": values.actual_address,
+            "{{mailing_address}}": values.mailing_address,
+            "{{company_phone}}": values.company_phone,
+            "{{personal_phone}}": values.personal_phone,
+            "{{email}}": values.email,
+            "{{website}}": values.website,
+            "{{bank}}": bank_details.bank_name,
+            "{{account_number}}": bank_details.account_number,
+            "{{correspondent_account}}": bank_details.correspondent_account,
+            "{{bik}}": bank_details.bik,
+        }
+        for placeholder, value in replace_values.items():
+            self.replace_placeholder(document, placeholder, value)
+
+        document.save(f"files/legal_entity_participation_form_{values.full_name}.docx")
+        return f"files/legal_entity_participation_form_{values.full_name}.docx"
+
+    def create_survey_form(
+            self,
+            values: CompanyLeaderForm | IndividualEntrepreneurForm | LegalEntityForm
+    ):
+        document = Document("templates/anketa.docx")
+        bank_details = values.bank_details
+        if not bank_details:
+            bank_details = BankDetails(
+                bank_name="",
+                account_number="",
+                correspondent_account="",
+                bik=""
+            )
+        try:
+            company_name = values.company_name
+            company_short_name = values.company_short_name
+        except AttributeError:
+            company_name = f"ИП {values.full_name}"
+            company_short_name = f"ИП {values.full_name}"
+        social_media = values.social_media
+
+        replace_values = {
+            "{{full_name}}": values.full_name,
+            "{{company_name}}": company_name,
+            "{{company_short_name}}": company_short_name,
+            "{{registration_date}}": values.registration_date,
+            "{{legal_address}}": values.legal_address,
+            "{{actual_address}}": values.actual_address,
+            "{{mailing_address}}": values.mailing_address,
+            "{{company_inn}}": values.company_inn,
+            "{{okved_codes}}": values.okved_codes,
+            "{{bank}}": bank_details.bank_name,
+            "{{account_number}}": bank_details.account_number,
+            "{{correspondent_account}}": bank_details.correspondent_account,
+            "{{bik}}": bank_details.bik,
+            "{{locations}}": values.locations,
+            "{{employee_count}}": values.employee_count,
+            "{{service_points_count}}": values.service_points_count,
+            "{{service_zones_photos}}": values.service_zones_photos,
+            "{{facilities}}": values.facilities,
+            "{{specialization}}": values.specialization,
+            "{{website}}": values.website,
+            "{{social_media}}": social_media,
+            "{{interested_services}}": values.interested_services,
+            "{{can_help_with}}": values.can_help_with,
+            "{{recommended_partners}}": values.recommended_partners,
+            "{{submission_date}}": values.submission_date,
+        }
+        for placeholder, value in replace_values.items():
+            self.replace_placeholder(document, placeholder, value)
+        document.save(f"files/survey_form_{values.full_name}.docx")
+        return f"files/survey_form_{values.full_name}.docx"
 
     def replace_placeholder(
             self,
