@@ -45,9 +45,8 @@ async def process_data(data: Any):
     survey_form = word.create_survey_form(serialized_data)
     if serialized_data.email:
         email_manager = EmailManager()
-        await email_manager.send_participation_email(serialized_data.email, participation_form, survey_form)
-    os.remove(participation_form)
-    os.remove(survey_form)
+        response = await email_manager.send_participation_email(serialized_data.email, participation_form, survey_form)
+
 
 def detect_form_type(data: dict) -> type:
     status = data.get("В каком статусе вы планируете участвовать в деятельности Союза?", "")
