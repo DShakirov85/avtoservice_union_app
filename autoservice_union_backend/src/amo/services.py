@@ -47,7 +47,7 @@ class AmoCRMManager:
         headers = {"Authorization": f"Bearer {self.amo_token}"}
         payload = [
                 {
-                "name": f"Заявка на вступление: {data.full_name}",
+                "name": f"Заявка на вступление: {data.full_name} {data.personal_phone}",
             }
         ]
         async with httpx.AsyncClient() as client:
