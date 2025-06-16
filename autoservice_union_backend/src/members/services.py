@@ -12,8 +12,8 @@ from .schemas import (
 from logger import logger
 
 from ms_word.services import MSWordManager
-
 from mail.services import EmailManager
+from amo.services import AmoCRMManager
 
 
 def fix_bad_json(bad_json_bytes):
@@ -46,6 +46,10 @@ async def process_data(data: Any):
     if serialized_data.email:
         email_manager = EmailManager()
         response = await email_manager.send_participation_email(serialized_data.email, participation_form, survey_form)
+    amo_crm_manager = AmoCRMManager()
+    response = await amo_crm_manager.send_lead_to_amo(serialized_data)
+    logger.info(response)
+
 
 
 def detect_form_type(data: dict) -> type:

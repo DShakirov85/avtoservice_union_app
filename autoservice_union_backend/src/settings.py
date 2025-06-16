@@ -22,4 +22,8 @@ class Settings(BaseSettings):
     MAIL_SSL: bool = os.environ.get("MAIL_SSL")
     USE_CREDENTIALS: bool = os.environ.get("USE_CREDENTIALS")
 
+    AMO_HOST: str = os.environ.get("AMO_HOST")
+    AMO_TOKEN: str = os.environ.get("AMO_TOKEN")
+
+
 settings = Settings()
