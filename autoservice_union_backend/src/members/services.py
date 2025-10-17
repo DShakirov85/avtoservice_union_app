@@ -48,13 +48,16 @@ async def process_data(data: Any):
     personal_data_consent = word.create_personal_data_consent(serialized_data)
     if serialized_data.email:
         email_manager = EmailManager()
-        response = await email_manager.send_participation_email(
-            serialized_data.email,
-            participation_form,
-            survey_form,
-            principle,
-            personal_data_consent
-        )
+        try:
+            await email_manager.send_participation_email(
+                serialized_data.email,
+                participation_form,
+                survey_form,
+                principle,
+                personal_data_consent
+            )
+        except Exception as e:
+            logger.warning(f"Email sent error: {e}")
 
     amo_crm_manager = AmoCRMManager()
     response = await amo_crm_manager.send_lead_to_amo(serialized_data)
