@@ -7,6 +7,7 @@ from members.schemas import   (
 )
 
 from members.schemas import BankDetails
+from logger import logger
 
 
 class MSWordManager:
@@ -15,7 +16,7 @@ class MSWordManager:
             values: CompanyLeaderForm
     ):
 
-        document = Document("templates/leader_participation_form.docx")
+        document = Document("templates/leader_participation_form_new.docx")
         bank_details = values.bank_details
         if not bank_details:
             bank_details = BankDetails(
@@ -34,6 +35,7 @@ class MSWordManager:
             "{{actual_address}}": values.actual_address,
             "{{mailing_address}}": values.mailing_address,
             "{{company_phone}}": values.company_phone,
+            "{{email}}": values.email,
             "{{personal_phone}}": values.personal_phone,
             "{{website}}": values.website,
         }
@@ -55,7 +57,7 @@ class MSWordManager:
                 correspondent_account="",
                 bik=""
             )
-        document = Document("templates/individual_participation_form.docx")
+        document = Document("templates/individual_participation_form_new.docx")
         replace_values = {
             "{{full_name}}": values.full_name,
             "{{registration_address}}": values.registration_address,
@@ -84,7 +86,7 @@ class MSWordManager:
         self,
         values: LegalEntityForm
     ):
-        document = Document("templates/legal_entity_participation_form.docx")
+        document = Document("templates/legal_entity_participation_form_new.docx")
         bank_details = values.bank_details
         if not bank_details:
             bank_details = BankDetails(
@@ -101,17 +103,18 @@ class MSWordManager:
             "{{director_position}}": values.director_position,
             "{{director_full_name}}": values.director_full_name,
             "{{registration_address}}": values.registration_address,
-            "{{tax_registration_date}}": values.tax_registration_date,
+            "{{registration_date}}": values.registration_date.strftime("%Y-%m-%d"),
             "{{company_inn}}": values.company_inn,
             "{{ogrnip}}": values.ogrnip,
             "{{okved_codes}}": values.okved_codes,
             "{{actual_address}}": values.actual_address,
+            "{{legal_address}}": values.legal_address,
             "{{mailing_address}}": values.mailing_address,
             "{{company_phone}}": values.company_phone,
             "{{personal_phone}}": values.personal_phone,
             "{{email}}": values.email,
             "{{website}}": values.website,
-            "{{bank}}": bank_details.bank_name,
+            "{{bank_name}}": bank_details.bank_name,
             "{{account_number}}": bank_details.account_number,
             "{{correspondent_account}}": bank_details.correspondent_account,
             "{{bik}}": bank_details.bik,
@@ -122,11 +125,12 @@ class MSWordManager:
         document.save(f"files/legal_entity_participation_form_{values.full_name}.docx")
         return f"files/legal_entity_participation_form_{values.full_name}.docx"
 
+
     def create_survey_form(
             self,
             values: CompanyLeaderForm | IndividualEntrepreneurForm | LegalEntityForm
     ):
-        document = Document("templates/anketa.docx")
+        document = Document("templates/anketa_new.docx")
         bank_details = values.bank_details
         if not bank_details:
             bank_details = BankDetails(
@@ -174,6 +178,33 @@ class MSWordManager:
             self.replace_placeholder(document, placeholder, value)
         document.save(f"files/survey_form_{values.full_name}.docx")
         return f"files/survey_form_{values.full_name}.docx"
+
+    def create_principle(
+        self,
+        values: CompanyLeaderForm | IndividualEntrepreneurForm | LegalEntityForm
+    ):
+        document = Document("templates/principles.docx")
+        replace_values = {
+            "{{full_name}}": values.full_name,
+         }
+        for placeholder, value in replace_values.items():
+            self.replace_placeholder(document, placeholder, value)
+        document.save(f"files/principles_{values.full_name}.docx")
+        return f"files/principles_{values.full_name}.docx"
+
+    def create_personal_data_consent(
+        self,
+        values: CompanyLeaderForm | IndividualEntrepreneurForm | LegalEntityForm
+    ):
+        document = Document("templates/personal_data_consent.docx")
+        replace_values = {
+            "{{full_name}}": values.full_name,
+         }
+        for placeholder, value in replace_values.items():
+            self.replace_placeholder(document, placeholder, value)
+        document.save(f"files/personal_data_consent_{values.full_name}.docx")
+        return f"files/personal_data_consent_{values.full_name}.docx"
+
 
     def replace_placeholder(
             self,

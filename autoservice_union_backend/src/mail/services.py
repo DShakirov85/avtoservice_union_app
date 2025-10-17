@@ -23,7 +23,9 @@ class EmailManager:
             self,
             email: str,
             participation_form: str,
-            survey_form: str
+            survey_form: str,
+            principle: str,
+            personal_data_consent: str
     ) -> None:
         conf = ConnectionConfig(
             MAIL_USERNAME=self.email_address,
@@ -40,7 +42,7 @@ class EmailManager:
             recipients=[email],
             body="Присылаем документы.",
             subtype="plain",
-            attachments=self.get_attachments(participation_form, survey_form)
+            attachments=self.get_attachments(participation_form, survey_form, principle, personal_data_consent)
         )
         fm = FastMail(conf)
         await fm.send_message(message)
@@ -48,9 +50,11 @@ class EmailManager:
     def get_attachments(
             self,
             participation_form: str,
-            survey_form: str
+            survey_form: str,
+            principle: str,
+            personal_data_consent: str
     ) -> list[Attachment]:
-        return [self.get_attachment(f) for f in (participation_form, survey_form)]
+        return [self.get_attachment(f) for f in (participation_form, survey_form, principle, personal_data_consent)]
 
     def get_attachment(
             self,

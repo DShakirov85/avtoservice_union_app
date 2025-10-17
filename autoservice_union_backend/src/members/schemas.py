@@ -1,9 +1,11 @@
-from pydantic import BaseModel, Field, HttpUrl, EmailStr, field_validator
-from typing import Optional, Union
+from pydantic import BaseModel, Field, HttpUrl, EmailStr, field_validator, ConfigDict, model_validator
+from typing import Optional, Union, Any
 from datetime import datetime
 
 
 class BankDetails(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     bank_name: Optional[str] = Field(None, alias="Наименование банка")
     account_number: Optional[str] = Field(None, alias="Расчетный счет")
     correspondent_account: Optional[str] = Field(None, alias="Корреспондентский счет")
@@ -11,6 +13,8 @@ class BankDetails(BaseModel):
 
 
 class AutoServiceUnionForm(BaseModel):
+    model_config = ConfigDict(extra='ignore')
+
     full_name: str = Field(..., alias="Ваши фамилия, имя и отчество")
     participation_status: str = Field(..., alias="В каком статусе вы планируете участвовать в деятельности Союза?")
 
@@ -32,8 +36,7 @@ class AutoServiceUnionForm(BaseModel):
     website: Optional[str] = Field(None, alias="Адрес сайта")
     email: EmailStr = Field(..., alias="Е-мейл организации / ИП")
 
-    bank_details: Optional[BankDetails] = None
-
+    bank_details: Optional[BankDetails] = Field(None, exclude=True)  # exclude=True, чтобы не искать его в исходном JSON
     locations: Optional[str] = Field(None, alias="В каких городах и населенных пунктах работает ваше предприятие")
     employee_count: Optional[int] = Field(None, alias="Среднесписочная численность организации")
     service_points_count: Optional[str] = Field(None, alias="Количество сервисов и ремонтных постов в каждом из них")
@@ -64,18 +67,26 @@ class AutoServiceUnionForm(BaseModel):
     data_accuracy_confirmation: Optional[str] = Field(None, alias="Достоверность данных подтверждаю")
     submission_date: str = Field(..., alias="Дата заполнения регистрационной формы")
 
-    @field_validator('bank_details', mode='before')
-    def set_bank_details(cls, v, values):
-        if any(values.get(field) in (None, "Нет ответа") for field in [
-            "Наименование_банка", "Расчетный_счет", "Корреспондентский_счет", "БИК"
-        ]):
-            return None
-        return BankDetails(
-            bank_name=values.get("Наименование_банка"),
-            account_number=values.get("Расчетный_счет"),
-            correspondent_account=values.get("Корреспондентский_счет"),
-            bik=values.get("БИК")
-        )
+    @model_validator(mode='before')
+    @classmethod
+    def assemble_bank_details(cls, data):
+        if not isinstance(data, dict):
+            return data
+
+        bank_data = {
+            "bank_name": data.get("Наименование банка"),
+            "account_number": data.get("Расчетный счет"),
+            "correspondent_account": data.get("Корреспондентский счет"),
+            "bik": data.get("БИК")
+        }
+        condition_met = all(value and value not in [None, "Нет ответа"] for value in bank_data.values())
+
+        if condition_met:
+            data['bank_details'] = bank_data
+        else:
+            data['bank_details'] = None
+
+        return data
 
     @field_validator(
         'tax_registration_date',
