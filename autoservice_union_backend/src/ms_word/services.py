@@ -170,7 +170,7 @@ class MSWordManager:
             "{{full_name}}": values.full_name,
             "{{company_name}}": company_name,
             "{{company_short_name}}": company_short_name,
-            "{{registration_date}}": values.registration_date,
+            "{{registration_date}}": values.tax_registration_date.strftime("%d-%m-%Y"),
             "{{legal_address}}": values.legal_address,
             "{{actual_address}}": values.actual_address,
             "{{mailing_address}}": values.mailing_address,
