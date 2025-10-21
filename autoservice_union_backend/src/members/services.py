@@ -46,16 +46,18 @@ async def process_data(data: Any):
     principle = word.create_principle(serialized_data)
     survey_form = word.create_survey_form(serialized_data)
     personal_data_consent = word.create_personal_data_consent(serialized_data)
+
     if serialized_data.email:
         email_manager = EmailManager()
         try:
-            await email_manager.send_participation_email(
+            response = await email_manager.send_participation_email(
                 serialized_data.email,
                 participation_form,
                 survey_form,
                 principle,
                 personal_data_consent
             )
+            logger.info(response)
         except Exception as e:
             logger.warning(f"Email sent error: {e}")
 

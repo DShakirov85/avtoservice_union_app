@@ -1,9 +1,12 @@
+from datetime import datetime
+
 from docx import Document
 
 from members.schemas import   (
     CompanyLeaderForm,
     IndividualEntrepreneurForm,
-    LegalEntityForm
+    LegalEntityForm,
+    RepresentativeInfo
 )
 
 from members.schemas import BankDetails
@@ -131,6 +134,15 @@ class MSWordManager:
             values: CompanyLeaderForm | IndividualEntrepreneurForm | LegalEntityForm
     ):
         document = Document("templates/anketa_new.docx")
+
+        representative_info = values.representative_info
+        if not representative_info:
+            representative_info = RepresentativeInfo(
+                position="",
+                name="",
+                email="",
+                phone=""
+            )
         bank_details = values.bank_details
         if not bank_details:
             bank_details = BankDetails(
@@ -147,6 +159,13 @@ class MSWordManager:
             company_short_name = f"ИП {values.full_name}"
         social_media = values.social_media
 
+        if isinstance(values, LegalEntityForm):
+            director_name = values.director_full_name
+            director_position = values.director_position
+        else:
+            director_name = values.full_name
+            director_position = ""
+
         replace_values = {
             "{{full_name}}": values.full_name,
             "{{company_name}}": company_name,
@@ -162,8 +181,8 @@ class MSWordManager:
             "{{correspondent_account}}": bank_details.correspondent_account,
             "{{bik}}": bank_details.bik,
             "{{locations}}": values.locations,
-            "{{employee_count}}": values.employee_count,
-            "{{service_points_count}}": values.service_points_count,
+            "{{employee_count}}": str(values.employee_count),
+            "{{service_points_count}}": str(values.service_points_count) if values.service_points_count else "",
             "{{service_zones_photos}}": values.service_zones_photos,
             "{{facilities}}": values.facilities,
             "{{specialization}}": values.specialization,
@@ -173,6 +192,14 @@ class MSWordManager:
             "{{can_help_with}}": values.can_help_with,
             "{{recommended_partners}}": values.recommended_partners,
             "{{submission_date}}": values.submission_date,
+            "{{director_position}}": director_position,
+            "{{director_name}}": director_name,
+            "{{company_phone}}": values.company_phone,
+            "{{email}}": values.email,
+            "{{representative_position}}": representative_info.position,
+            "{{representative_name}}": representative_info.name,
+            "{{representative_email}}": representative_info.email,
+            "{{representative_phone}}": representative_info.phone
         }
         for placeholder, value in replace_values.items():
             self.replace_placeholder(document, placeholder, value)
@@ -199,6 +226,7 @@ class MSWordManager:
         document = Document("templates/personal_data_consent.docx")
         replace_values = {
             "{{full_name}}": values.full_name,
+            "{{date}}": datetime.today().strftime("%d.%m.%Y"),
          }
         for placeholder, value in replace_values.items():
             self.replace_placeholder(document, placeholder, value)

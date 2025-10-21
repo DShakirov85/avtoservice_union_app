@@ -1,4 +1,6 @@
-from pydantic import BaseModel, Field, HttpUrl, EmailStr, field_validator, ConfigDict, model_validator
+import re
+
+from pydantic import BaseModel, Field, HttpUrl, EmailStr, field_validator, ConfigDict, model_validator, validator
 from typing import Optional, Union, Any
 from datetime import datetime
 
@@ -10,6 +12,17 @@ class BankDetails(BaseModel):
     account_number: Optional[str] = Field(None, alias="Расчетный счет")
     correspondent_account: Optional[str] = Field(None, alias="Корреспондентский счет")
     bik: Optional[str] = Field(None, alias="БИК")
+
+
+class RepresentativeInfo(BaseModel):
+    position: Optional[str] = Field(None, description="Должность сотрудника")
+    name: Optional[str] = Field(None, description="ФИО сотрудника")
+    email: Optional[str] = Field(None, description="Электронная почта")
+    phone: Optional[str] = Field(None, description="Телефон")
+    power_of_attorney_number: Optional[str] = Field(None, description="Номер доверенности")
+    power_of_attorney_date: Optional[str] = Field(None, description="Дата выдачи доверенности")
+    power_of_attorney_place: Optional[str] = Field(None, description="Место выдачи доверенности")
+    power_of_attorney_validity: Optional[str] = Field(None, description="Срок действия доверенности")
 
 
 class AutoServiceUnionForm(BaseModel):
@@ -123,6 +136,25 @@ class AutoServiceUnionForm(BaseModel):
     @field_validator('company_ogrnip', 'company_inn', mode='before')
     def parse_ogrnip_and_inn(cls, v):
         return None if v == "Нет ответа" else v
+
+    @field_validator('representative', mode='before')
+    def parse_representative(cls, value):
+        if not value or not isinstance(value, str):
+            return value
+
+        data = {}
+        lines = value.split("\\n")
+        data["position"] = lines[1].replace('Должность сотрудника - ', '')
+        data["name"] = lines[2].replace('Фамилия, имя и отчество - ', '')
+        data["email"] = lines[3].replace('Е-мейл - ', '')
+        data["phone"] = lines[4].replace('Телефон - ', '')
+
+        cls._representative_info = RepresentativeInfo(**data)
+        return value
+
+    @property
+    def representative_info(self) -> RepresentativeInfo:
+        return getattr(self, "_representative_info", None)
 
 
 class CompanyLeaderForm(AutoServiceUnionForm):
