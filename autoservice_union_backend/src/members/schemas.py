@@ -3,6 +3,7 @@ import re
 from pydantic import BaseModel, Field, HttpUrl, EmailStr, field_validator, ConfigDict, model_validator, validator
 from typing import Optional, Union, Any
 from datetime import datetime
+from logger import logger
 
 
 class BankDetails(BaseModel):
@@ -144,10 +145,13 @@ class AutoServiceUnionForm(BaseModel):
 
         data = {}
         lines = value.split("\\n")
-        data["position"] = lines[1].replace('Должность сотрудника - ', '')
-        data["name"] = lines[2].replace('Фамилия, имя и отчество - ', '')
-        data["email"] = lines[3].replace('Е-мейл - ', '')
-        data["phone"] = lines[4].replace('Телефон - ', '')
+        try:
+            data["position"] = lines[1].replace('Должность сотрудника - ', '')
+            data["name"] = lines[2].replace('Фамилия, имя и отчество - ', '')
+            data["email"] = lines[3].replace('Е-мейл - ', '')
+            data["phone"] = lines[4].replace('Телефон - ', '')
+        except IndexError as e:
+            logger.info(e)
 
         cls._representative_info = RepresentativeInfo(**data)
         return value
