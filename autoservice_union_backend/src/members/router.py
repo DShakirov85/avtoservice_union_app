@@ -13,7 +13,7 @@ from .services import fix_bad_json, process_data
 
 
 router = APIRouter(
-    prefix="/api/members",
+    prefix="",
     tags=["survey"]
 )
 
