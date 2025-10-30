@@ -16,6 +16,7 @@ class Settings(BaseSettings):
 
     EMAIL_ADDRESS: str = os.environ.get("EMAIL_ADDRESS")
     EMAIL_PASSWORD: str = os.environ.get("EMAIL_PASSWORD")
+    ADMIN_EMAIL_ADDRESS: str = os.environ.get("ADMIN_EMAIL_ADDRESS")
     MAIL_PORT: str = os.environ.get("MAIL_PORT")
     MAIL_SERVER: str = os.environ.get("MAIL_SERVER")
     MAIL_TLS: bool = os.environ.get("MAIL_TLS")

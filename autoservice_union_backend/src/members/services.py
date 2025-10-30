@@ -14,6 +14,7 @@ from logger import logger
 from ms_word.services import MSWordManager
 from mail.services import EmailManager
 from amo.services import AmoCRMManager
+from settings import settings
 
 
 def fix_bad_json(bad_json_bytes):
@@ -47,15 +48,24 @@ async def process_data(data: Any):
     survey_form = word.create_survey_form(serialized_data)
     personal_data_consent = word.create_personal_data_consent(serialized_data)
 
+    email_manager = EmailManager()
     if serialized_data.email:
-        email_manager = EmailManager()
         try:
             response = await email_manager.send_participation_email(
-                serialized_data.email,
+                #serialized_data.email,
+                settings.ADMIN_EMAIL_ADDRESS,
                 participation_form,
                 survey_form,
                 principle,
                 personal_data_consent
+            )
+            logger.info(response)
+        except Exception as e:
+            logger.warning(f"Email sent error: {e}")
+
+        try:
+            response = await email_manager.send_confirmation_email(
+                serialized_data.email
             )
             logger.info(response)
         except Exception as e:

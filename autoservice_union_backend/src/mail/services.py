@@ -38,6 +38,58 @@ class EmailManager:
             USE_CREDENTIALS=self.use_credentials
         )
         message = MessageSchema(
+            subject="Новая анкета на вступление",
+            recipients=[email],
+            body="Присылаем документы.",
+            subtype="plain",
+            attachments=self.get_attachments(participation_form, survey_form, principle, personal_data_consent)
+        )
+        fm = FastMail(conf)
+        await fm.send_message(message)
+
+    async def send_confirmation_email(
+            self,
+            email: str,
+    ) -> None:
+        conf = ConnectionConfig(
+            MAIL_USERNAME=self.email_address,
+            MAIL_PASSWORD=self.email_password,
+            MAIL_FROM=self.email_address,
+            MAIL_PORT=self.email_port,
+            MAIL_SERVER=self.email_server,
+            MAIL_STARTTLS=self.email_tls,
+            MAIL_SSL_TLS=self.email_ssl,
+            USE_CREDENTIALS=self.use_credentials
+        )
+        message_body = "Ваша заявка на вступление в рассмотрении. Сейчас мы проверяем документы. Для обратной связи вы можете написать в телеграм @Marth_shch или на почту member@soyuzavtoservisov.ru"
+        message = MessageSchema(
+            subject="Вступление в Союз Автосервисов",
+            recipients=[email],
+            body=message_body,
+            subtype="plain",
+        )
+        fm = FastMail(conf)
+        await fm.send_message(message)
+
+    async def send_participation_email(
+            self,
+            email: str,
+            participation_form: str,
+            survey_form: str,
+            principle: str,
+            personal_data_consent: str
+    ) -> None:
+        conf = ConnectionConfig(
+            MAIL_USERNAME=self.email_address,
+            MAIL_PASSWORD=self.email_password,
+            MAIL_FROM=self.email_address,
+            MAIL_PORT=self.email_port,
+            MAIL_SERVER=self.email_server,
+            MAIL_STARTTLS=self.email_tls,
+            MAIL_SSL_TLS=self.email_ssl,
+            USE_CREDENTIALS=self.use_credentials
+        )
+        message = MessageSchema(
             subject="Подтверждение регистрации в Союзе Автосервисов",
             recipients=[email],
             body="Присылаем документы.",
